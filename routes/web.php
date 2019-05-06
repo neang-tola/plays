@@ -31,6 +31,11 @@ Route::get('/get-prize-by-event/{event_id}', [
     'as'   => 'get_prize'
 ]);
 
+Route::get('/check-spin-action', [
+    'uses' => 'LuckyDrawController@checkActivitySpin',
+    'as'   => 'check_spin_action'
+]);
+
 Route::get('/update-spin-time', [
     'uses' => 'LuckyDrawController@updateSpinTime',
     'as'   => 'update_spintime'

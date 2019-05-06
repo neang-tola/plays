@@ -74,16 +74,13 @@
         var get_url  = "{{ route('get_prize', '') }}/"+ event_id;
 
         gift_offer.find('option').not(':first').remove();
-        $('#start_spin').prop('disabled', false).text('Start Spin');
+        $('#btn_save').addClass('disabled').prop('disabled', true);
 
         if(event_id != '' && $.isNumeric(event_id)){
                 $.ajax({
                     url: get_url,
                     method: 'GET',
                     dataType: 'json',
-                    // beforeSend: function(){
-                    //     $('#btn_save').removeClass('disabled');
-                    // }
                     success: function (response){
                         if(response){
                             var sel_option = '';
@@ -109,16 +106,7 @@
 
     $('body').on('change', '#select_gift', function(){
         var offer_id = $(this).val();
-            //var offer_num = $(this).find('option:selected').attr('data-num');
-            //var offer_times = $(this).find('option:selected').attr('data-time');
-            //var offer_time_ids = $(this).find('option:selected').attr('data-time_id');
-            // var inc_win   = $(this).find('option:selected').attr('data-inc');
-            //var id_time = offer_time_ids;
 
-            //if(offer_time_ids.indexOf(',') > 0){
-            //    var times = offer_time_ids.split(',');
-            //    id_time   = times[0];
-            //}
         $('#btn_save').addClass('disabled').prop('disabled', true);
         if(offer_id != '' && $.isNumeric(offer_id)){
             $('#btn_save').removeClass('disabled').prop('disabled', false);
@@ -126,19 +114,49 @@
         
     });  
 
-    $('body').on('change', '#star_save', function(e){
-        e.preventDefault();
-        var event_id = $('select_event').val();
-        var prize_id = $('select_gift').val();
+    $('body').on('click', '#btn_save', function(){
+        var get_url  = "{{ route('pre_start_spin') }}";
+        var event_id = $('#select_event').val();
+        var prize_id = $('#select_gift').val();
 
+        $.ajax({
+            url: get_url,
+            method: 'GET',
+            dataType: 'json',
+            data: {'event_id': event_id, 'prize_id': prize_id },
+            beforeSend: function(){
+                $('#select_event').prop('disabled', true).select2();
+                $('#select_gift').prop('disabled', true).select2();
+                $('#btn_save').addClass('disabled').prop('disabled', true);
+            },
+            success: function(response){
+                if (response.msg == 'Successful'){
+
+                }
+            }
+        })
     });
 
   setTimeout(function(){
-    $('.odometer').html(423234234);
+    check_data();
   }, 1000);
 
-  function loading_data(){
-
+  function check_data(){
+        $.ajax({
+            url: '{{ route("check_spin_action") }}',
+            method: 'GET',
+            dataType: 'json',
+            success: function(response){
+                $('#select_event').prop('disabled', true).select2();
+                $('#select_gift').prop('disabled', true).select2();
+                $('#btn_save').addClass('disabled').prop('disabled', true);                
+                if (response.msg == 'yes'){
+                    $('#select_event').prop('disabled', false).select2();
+                    $('#select_gift').prop('disabled', false).select2();
+                    $('#btn_save').removeClass('disabled').prop('disabled', false);
+                }
+            }
+        })
   }
 </script>
 

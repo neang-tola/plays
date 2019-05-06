@@ -555,15 +555,20 @@ class OfferPrizingController extends VoyagerBaseController
             $val = [];
             $result = floor($num / $time);
             $mod = $num % $time;  
+
             for($i=0; $i<$result; $i++){
-                $val[$i] = ($i == $result - 1) ? $mod + $time : $time;
+                $val[$i] = $time;
+                if($mod > 0 && ($i == $result - 1)){
+                    $val[$result - 1] = $mod + $time;
+               }
             }
+            
         }
 
         // remove existing data for update
         if(!empty($prize_id)){
-            $spin_time = SpinTime::where('prize_id', $prize_id)->get();
-            if(count($spin_time))
+            $spin_time = SpinTime::where('prize_id', $prize_id)->count();
+            if($spin_time)
                 SpinTime::where('prize_id', $prize_id)->delete();
         }
 

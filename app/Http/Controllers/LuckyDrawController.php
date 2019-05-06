@@ -42,13 +42,15 @@ class LuckyDrawController extends Controller
     {
       $status = ['msg'=>'Fail'];
 
-      $timeId  = $request->get('time_id');
+      // $timeId  = $request->get('time_id');
       $prizeId = $request->get('prize_id');
       $eventId = $request->get('event_id');    
 
-      if(!empty($timeId)){
-        SpinTime::where('id', $timeId)->update(['ready'>2]);
+      if(!empty($prizeId)){
+        SpinTime::where('prize_id', $prizeId)->update(['ready'=>2]);
+        $status = ['msg'=>'Successful'];
       }
+      return response()->json($status);
     }
 
     public function getPrizeByEvent($event_id)
@@ -114,5 +116,14 @@ class LuckyDrawController extends Controller
       return response()->json($response);
     }
 
+    public function checkActivitySpin()
+    {
+      $status = ['msg'=>'no', 'data'=>'';
+      $cur_data = SpinTime::currentSpin();
+      if(count($cur_data)){
+        $status = ['msg'=>'yes', 'data'=>$cur_data];
+      }
+      return response()->json($status);
+    }
 }
   

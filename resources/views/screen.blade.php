@@ -83,9 +83,78 @@
     </div>
 
 <script>
-window.odometerOptions = {
-  format: 'd'
-};  
+        var container = document.querySelector('.after_section');
+        window.odometers = [];
+        window.times = [];
+        window.id_times = [];
+
+        window.luckies = [];
+
+        $(document).ready(function() {
+            
+            
+        });
+
+        $('body').on('click', '#start_spin', function(){
+
+            setTimeout(winners = function(){
+
+                var ids = [];
+                var numbers = [];
+                // console.log(luckies); return false;
+                for(var i=0; i < luckies.length; i++){
+                    odometers[i].update(luckies[i].number);
+                    numbers.push(luckies[i].id);
+                    ids.push(luckies[i].participant_id);
+                }
+
+                return {'id': ids, 'number': numbers};
+            }, 2000);
+               
+            // assign value all winner to variable
+            var winners = winners();
+            // console.log(winners.id);
+            // update spin time after generate
+
+                var url = "{{ route('update_spintime') }}";
+                var event_id = $('#select_event').val();
+                var prize_id = $('#select_gift').val();
+                
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    dataType: 'json',
+                    data: { 'time_id': id_times[0],
+                            'winner_id': winners.id,
+                            'winner_num': winners.number,
+                            'prize_id': prize_id,
+                            'event_id': event_id },
+                    success: function (response){
+                        if(response.msg == 'Successful'){
+                            
+                            if(response.spin_time == 0){
+                                $('#select_gift').prop('disabled', false).select2();
+                                $('#select_gift option:selected').prop('disabled', true);
+                                $('#start_spin').prop('disabled', true).text('Start Spin');
+                                
+                            }else{
+                                times.shift();
+                                id_times.shift();                                
+                                $('#select_gift option:selected').attr({'data-time': times.toString(), 'data-time_id': id_times.toString()});
+
+                                $('#start_spin').text('Spin Next');
+                                $('#select_gift').prop('disabled', true);
+                            }
+                            $('#select_gift').select2();
+                        }
+                    },
+                    complete: function(){
+                        $('#start_spin').removeAttr('disabled');
+                    }
+                });
+         
+        });       
+
   setTimeout(function(){
     $('.odometer').html(423234234);
   }, 1000);
@@ -93,6 +162,71 @@ window.odometerOptions = {
   function loading_data(){
 
   }
+
+          function createOdometer(){
+            var el = document.createElement('div');
+            // var card_el = document.createElement('div');
+            var cont = document.createElement('div');
+            var col = document.createElement('div');
+
+            // card_el.className = 'card';
+            // el.className = 'card-body';
+            cont.className = 'odometer-container';
+            col.className = 'col item-odometer';
+
+            card_el.appendChild(el)
+            cont.appendChild(card_el);
+            col.appendChild(cont);
+            container.appendChild(col);
+
+            var od = new Odometer({
+                auto: false,
+                el: el,
+                format: 'd', 
+                duration: 3000,
+                // zeroFlag: true,
+                numberLength: 8,
+                value: 111111111,
+                animation: 'count'   
+            });
+
+            return od;
+        }
+
+        function buildOdometers(num, incw, prize_id)
+        {
+            if(num > 0){
+
+                var get_url = "{{ route('pickup_winner') }}?inc_win="+ incw +"&count="+ num +"&prize_id="+ prize_id;
+                destroyOdometer();
+
+                for(var i=0; i < num; i++){
+                    odometers.push(createOdometer());
+                }
+
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: get_url,
+                    async: false,
+                    success: function (response){
+                        
+                        if(response.status == 'success'){
+                            luckies = response.data;
+                        }
+                        
+                    }
+                });
+            }
+        }
+
+        function destroyOdometer()
+        {
+            if(odometers.length > 0){
+                $('.item-odometer').remove();
+                odometers = [];
+            }
+        }
 </script>
 
   </body>
