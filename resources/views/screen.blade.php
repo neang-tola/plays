@@ -7,8 +7,7 @@
     <meta name="author" content="">
 
     <title>Lucky Draw Application</title>
-
-    <link href="https://fonts.googleapis.com/css?family=Changa+One|Squada+One" rel="stylesheet">
+    <link rel="icon" href="{{ asset('img/favicon.png') }}">
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/odometer-theme-car.css') }}" />
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -24,167 +23,198 @@
       </div>
       <div class="col-6 text-center">
         <img src="{{ asset('img/Letter.png') }}" class="img_responsive" />
-        <h2 class="event_title">29-04-2019 12:00 PM</h2>
+        <h2 class="event_title">09-05-2019 <span id="MyClockDisplay" class="clock" onload="showTime()"></span></h2>
       </div>
       <div class="col text-center">
         <img src="{{ asset('img/Bloby.png') }}" class="img_responsive" />
       </div>
     </div>
 
-    <div class="row">
-        <div class="col text-right align-top">
-          <img src="{{ asset('img/lucky_draw.gif') }}" class="img_responsive">
-        </div>
-        <div class="col text-center award_bg">
-          <h3 class="prize disable-select">Prize</h3>
-          <h1 class="number disable-select">1</h1>
-          <h3 class="award disable-select">Motor</h3>
-          <button class="btn_start disabled" id="start_spin"></button>
-        </div>
-        <div class="col text-left align-top">
-          <img src="img/suzuki-smash.png" class="img_responsive" />
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-6 text-right align-top no_padding_l">
-          <div class="pr-5">
+    <div class="row" style="min-height: 600px; overflow-y: hidden;">
+        <div class="col-5 text-right align-top">
             <div class="after_section"></div>
-          </div>
         </div>
-        <div class="col-6 text-left align-top no_padding_r">
-          <div class="pl-5 table-responsive">
-            <table class="table_custom" cellspacing="1" border="1" >
+        <div class="col-2 text-center award_bg">
+          <h3 class="prize disable-select">រង្វាន់</h3>
+          <h1 class="number disable-select"></h1>
+          <h3 class="award disable-select"></h3>
+          <button class="btn_start disabled" id="start_spin" disabled="disabled"></button>
+          <button class="btn_next" id="next_prize" style="display:none"></button>
+          <div class="image"></div>
+        </div>
+        <div class="col-5 text-left align-top">
+          <div class="table-responsive">
+            <table class="table_custom" cellspacing="1" border="5" id="winner_list" >
               <thead>
                 <tr>
                   <th class="no">N<sup>o</sup></th>
                   <th class="name">Name</th>
                   <th class="id">ID</th>
-                  <th class="prize">Prize</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>1</td>
-                  <td class="name">Sok San</td>
-                  <td>0099988</td>
-                  <td>Motor</td>
-                </tr>
-
-              </tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>
     </div>
   
     <div class="row row_footer">
-      <p class="copyright"> 
-      © 2019 Copyright: <a href="http://www.anachak-it.com" target="_blank"> Anachak-IT </a>
-      </p>
+        <p class="copyright"> 
+        © 2019 Copyright: <a href="http://www.anachak-it.com" target="_blank"> Anachak-IT </a>
+        </p>
+        <audio id="createSoundCtrl">
+          <source src="{{ asset('sound/game.mp3') }}" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>      
     </div>
 
 <script>
         var container = document.querySelector('.after_section');
         window.odometers = [];
-        window.times = [];
-        window.id_times = [];
 
         window.luckies = [];
+        window.last_tr = {{ ($entry) ? $entry->winner_count : 0 }};
 
         $(document).ready(function() {
-            
-            
+            showTime();
+            @if($entry)
+                var num_items = {{ ($entry) ? $entry->num_item : 0 }};
+                var win_inc   = {{ ($entry) ? $entry->include_winner : 0 }};
+                var prize_id  = {{ ($entry) ? $entry->id : 0 }};
+                var time_id   = {{ ($entry) ? $entry->time_id : 0 }};
+                var event_id  = {{ ($entry) ? $entry->event_id : 0}};
+                var img_src   = "{{ ($entry) ? $image : '' }}";
+                var award_title = "{{ ($entry) ? $entry->title : '' }}";
+                var all_prize = "{{ ($entry) ? $entry->numbers : '' }}";
+
+                for(var i=0; i<num_items; i++){
+                    odometers.push(createOdometer());
+                }
+
+                // buildOdometers(num_items, win_inc, prize_id, time_id, event_id);
+                $('.award_bg h1.number').text(all_prize);
+                $('.award_bg h3.award').text(award_title);
+                if(img_src != ''){
+                    var image = '<img src="'+ removeDomain(img_src) +'" class="img_responsive"/>';
+                    $('.award_bg .image').html(image);
+                }
+                $('#start_spin').removeClass('disabled').prop('disabled', false);
+
+            @else
+                $('#start_spin').addClass('disabled').prop('disabled', true).fadeOut();
+                $('#next_prize').fadeIn();
+            @endif
         });
 
         $('body').on('click', '#start_spin', function(){
+            $('#createSoundCtrl')[0].play();
+            loading_data(true);
 
-            setTimeout(winners = function(){
-
-                var ids = [];
-                var numbers = [];
-                // console.log(luckies); return false;
-                for(var i=0; i < luckies.length; i++){
-                    odometers[i].update(luckies[i].number);
-                    numbers.push(luckies[i].id);
-                    ids.push(luckies[i].participant_id);
-                }
-
-                return {'id': ids, 'number': numbers};
-            }, 2000);
-               
+            setTimeout(function(){
+                $('#winner_list').fadeIn();
+            }, 15000);   
+            
             // assign value all winner to variable
-            var winners = winners();
+            // var winners = winners();
             // console.log(winners.id);
-            // update spin time after generate
-
-                var url = "{{ route('update_spintime') }}";
-                var event_id = $('#select_event').val();
-                var prize_id = $('#select_gift').val();
-                
-                $.ajax({
-                    type: 'GET',
-                    url: url,
-                    dataType: 'json',
-                    data: { 'time_id': id_times[0],
-                            'winner_id': winners.id,
-                            'winner_num': winners.number,
-                            'prize_id': prize_id,
-                            'event_id': event_id },
-                    success: function (response){
-                        if(response.msg == 'Successful'){
-                            
-                            if(response.spin_time == 0){
-                                $('#select_gift').prop('disabled', false).select2();
-                                $('#select_gift option:selected').prop('disabled', true);
-                                $('#start_spin').prop('disabled', true).text('Start Spin');
-                                
-                            }else{
-                                times.shift();
-                                id_times.shift();                                
-                                $('#select_gift option:selected').attr({'data-time': times.toString(), 'data-time_id': id_times.toString()});
-
-                                $('#start_spin').text('Spin Next');
-                                $('#select_gift').prop('disabled', true);
-                            }
-                            $('#select_gift').select2();
-                        }
-                    },
-                    complete: function(){
-                        $('#start_spin').removeAttr('disabled');
-                    }
-                });
-         
         });       
 
-  setTimeout(function(){
-    $('.odometer').html(423234234);
-  }, 1000);
+        $('body').on('click', '#next_prize', function(){
+            loading_next_prize();
+        });
 
-  function loading_data(){
+        function loading_data(){
+            var get_url = "{{ route('screen_show') }}";
 
-  }
+            $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: get_url,
+                    success: function (response){
+                        
+                        if(response.status == 'Successful'){
+                            var entry = response.entry;
+                            var num_items = entry.num_item;
+                            var win_inc   = entry.include_winner;
+                            var prize_id  = entry.id;
+                            var time_id   = entry.time_id;
+                            var event_id  = entry.event_id;
+                            var award_title = entry.title;
+                            var all_prize = entry.numbers;
 
-          function createOdometer(){
+                            for(var i=0; i<num_items; i++){
+                                odometers.push(createOdometer());
+                            }
+
+                            $('.award_bg h1.number').text(all_prize);
+                            $('.award_bg h3.award').text(award_title);
+                            buildOdometers(num_items, win_inc, prize_id, time_id, event_id);
+               
+                        }
+                        
+                    }
+            });
+        }
+
+        function loading_next_prize(){
+            var get_url = "{{ route('screen_show') }}";
+
+            $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: get_url,
+                    success: function (response){
+                        
+                        if(response.status == 'Successful'){
+                            $('#next_prize').fadeOut();
+                            $('#start_spin').removeClass('disabled').prop('disabled', false).fadeIn();
+
+                            var entry = response.entry;
+                            var num_items = entry.num_item;
+                            var award_title = entry.title;
+                            var all_prize = entry.numbers;
+                            var img_src   = response.image;
+                            if(img_src != ''){
+                                var image = '<img src="'+ removeDomain(img_src) +'" class="img_responsive"/>';
+                                $('.award_bg .image').html(image);
+                            }
+
+                            destroyOdometer();
+                            $('.award_bg h1.number').text(all_prize);
+                            $('.award_bg h3.award').text(award_title);                                
+                            $('#winner_list tbody').empty();
+                            $('#winner_list').fadeOut();    
+                        }
+                        
+                    }
+            });
+        }
+
+        function listDownWinner(ind_no=1, name, number, prize){
+            var str_tr  = '<tr>';
+                str_tr += '<td>'+ ind_no +'</td>';
+                str_tr += '<td class="name">'+ name +'</td>';
+                str_tr += '<td>'+ number +'</td>';
+                // str_tr += '<td>'+ prize +'</td>';
+
+            return str_tr;
+        }
+
+        function createOdometer(){
             var el = document.createElement('div');
-            // var card_el = document.createElement('div');
-            var cont = document.createElement('div');
             var col = document.createElement('div');
 
-            // card_el.className = 'card';
-            // el.className = 'card-body';
-            cont.className = 'odometer-container';
-            col.className = 'col item-odometer';
+            el.className = 'odometer-container';
+            col.className = 'col item-odometer no_padding';
 
-            card_el.appendChild(el)
-            cont.appendChild(card_el);
-            col.appendChild(cont);
+            col.appendChild(el);
             container.appendChild(col);
 
             var od = new Odometer({
                 auto: false,
                 el: el,
                 format: 'd', 
-                duration: 3000,
-                // zeroFlag: true,
+                duration: 14000,
                 numberLength: 8,
                 value: 111111111,
                 animation: 'count'   
@@ -193,11 +223,24 @@
             return od;
         }
 
-        function buildOdometers(num, incw, prize_id)
+        function buildOdometers(num, incw, prize_id, time_id, event_id)
         {
             if(num > 0){
+                var params = "?inc_win="+ incw +"&count="+ num +"&prize_id="+ prize_id +"&time_id="+ time_id +"&event_id="+ event_id;
+                var get_url = "{{ route('pickup_winner') }}"+ params;
+                var ind_num = $('#winner_list tbody tr:last').text();
 
-                var get_url = "{{ route('pickup_winner') }}?inc_win="+ incw +"&count="+ num +"&prize_id="+ prize_id;
+                if(ind_num == '' && last_tr == 0){
+                    ind_num = 0;
+                }else if(ind_num == '' && last_tr > 0){
+                    ind_num = parseInt(last_tr);
+                }else{
+                    ind_num = parseInt(ind_num);
+                }
+
+                $('#winner_list').fadeOut();
+                $('#winner_list tbody').empty();
+
                 destroyOdometer();
 
                 for(var i=0; i < num; i++){
@@ -209,14 +252,39 @@
                     dataType: 'json',
                     url: get_url,
                     async: false,
+                    beforeSend: function (){
+                        $('#start_spin').addClass('disabled').prop('disabled', true);
+                    },
                     success: function (response){
-                        
-                        if(response.status == 'success'){
+            
+                        if(response.status == 'Successful'){
                             luckies = response.data;
+                            var winner_tr = '';
+                            // var ind_num   = (last_tr == '') ? 0 : parseInt(last_tr);
+                            if(luckies.length > 0){
+                                for(var j=0; j < luckies.length; j++){
+                                    odometers[j].update(luckies[j].number);
+         
+                                    winner_tr += listDownWinner(++ind_num, luckies[j].name, luckies[j].number, luckies[j].title);
+                                }
+                                if(response.count == 0){
+                                    $('#start_spin').addClass('disabled').prop('disabled', true).fadeOut();
+                                    $('#next_prize').fadeIn();
+                                }else{
+                                    $('#start_spin').removeClass('disabled').prop('disabled', false);
+                                }
+                                
+                                $('#winner_list').fadeIn();
+                                setTimeout(function(){
+                                    $('#winner_list tbody').html(winner_tr);
+                                }, 14000);
+                    
+                            }                            
                         }
                         
                     }
                 });
+                // console.log(luckies);
             }
         }
 
@@ -227,6 +295,40 @@
                 odometers = [];
             }
         }
+
+        function removeDomain(full_url)
+        {
+            var str_name = full_url.replace('http://lucky.test', '');
+            return str_name;
+        }
+
+        function showTime(){
+            var date = new Date();
+            var h = date.getHours(); // 0 - 23
+            var m = date.getMinutes(); // 0 - 59
+            var s = date.getSeconds(); // 0 - 59
+            var session = "AM";
+            
+            if(h == 0){
+                h = 12;
+            }
+            
+            if(h > 12){
+                h = h - 12;
+                session = "PM";
+            }
+            
+            h = (h < 10) ? "0" + h : h;
+            m = (m < 10) ? "0" + m : m;
+            s = (s < 10) ? "0" + s : s;
+            
+            var time = h + ":" + m + ":" + s + " " + session;
+            document.getElementById("MyClockDisplay").innerText = time;
+            document.getElementById("MyClockDisplay").textContent = time;
+            
+            setTimeout(showTime, 1000);
+            
+        }       
 </script>
 
   </body>

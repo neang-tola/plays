@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use TCG\Voyager\Voyager;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -26,12 +27,14 @@ class LuckyDrawController extends Controller
 
     public function screen(Request $request)
     {
+      $voyager = new Voyager();
       $spin_data = OfferPrizing::findCurrentSpinTime();
 
       $data['entry'] = $spin_data;
+      $data['image'] = !empty($spin_data) ? $voyager->image($spin_data->image) : '';
 
       if($request->ajax()){
-        $data['status'] = ($spin_data) ? 'Successful' : 'Fail';
+        $data['status'] = !empty($spin_data) ? 'Successful' : 'Fail';
         return response()->json($data);
       }
 
@@ -67,10 +70,10 @@ class LuckyDrawController extends Controller
       $status = ['msg'=>'Fail'];
 
       $timeId     = $request->get('time_id');
-      $winnerIds  = $request->get('winner_id');
-      $winnerNums = $request->get('winner_num');
-      $prizeId    = $request->get('prize_id');
-      $eventId    = $request->get('event_id');
+      // $winnerIds  = $request->get('winner_id');
+      // $winnerNums = $request->get('winner_num');
+      // $prizeId    = $request->get('prize_id');
+      // $eventId    = $request->get('event_id');
 
       if(count($winnerIds)){
         // Update spin time
@@ -101,24 +104,43 @@ class LuckyDrawController extends Controller
 
     public function pickUpWinner(Request $request)
     {
-      $response = ['status'=>'error', 'data'=>[]];
-      $incWin = $request->get('inc_win');
-      $limit  = $request->get('count');
-      $prizeId= $request->get('prize_id');
+      $response = ['status'=>'Fail', 'data'=>[]];
+      $timeId  = $request->get('time_id');
+      $eventId = $request->get('event_id');
+      $incWin  = $request->get('inc_win');
+      $limit   = $request->get('count');
+      $prizeId = $request->get('prize_id');
 
       $results = Play::pickPlayer($prizeId, $limit, $incWin);
-      if(count($results) < $limit)
-        $results = Play::pickPlayer($prizeId, $limit, $incWin, false);
 
-      if(count($results))
-        $response = ['status'=>'success', 'data'=>$results];
+      if(count($results)){
+        $add_winners = [];
+        SpinTime::where('id', $timeId)->update(['ready'=>1]);
+
+        foreach ($results as $winner) {
+          
+          $add_winners[] = ['participant_id'=>$winner->participant_id, 
+                            'event_id'=>$eventId, 
+                            'prize_id'=>$prizeId,
+                            'win_number'=>$winner->number,
+                            'created_at'=>date('Y-m-d H:i:s')];
+
+          Play::where('id', $winner->id)->update(['is_picked'=>1]);
+          
+        }
+        if($add_winners)
+          Winner::insert($add_winners);    
+
+        $free_spin = OfferPrizing::freeSpinTimes($prizeId);
+        $response = ['status'=>'Successful', 'data'=>$results, 'count'=>$free_spin];
+      }
 
       return response()->json($response);
     }
 
     public function checkActivitySpin()
     {
-      $status = ['msg'=>'no', 'data'=>'';
+      $status = ['msg'=>'no', 'data'=>''];
       $cur_data = SpinTime::currentSpin();
       if(count($cur_data)){
         $status = ['msg'=>'yes', 'data'=>$cur_data];

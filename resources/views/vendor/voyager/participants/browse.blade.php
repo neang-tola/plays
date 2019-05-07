@@ -25,7 +25,7 @@
             @endcan
             @include('voyager::multilingual.language-selector')
         </div>
-        <div class="col-md-6 col-sm-6">
+<!--         <div class="col-md-6 col-sm-6">
             <div class="row" style="height: 100px; padding-top: 30px">
                 <form id="action_import" action="{{ route('participants.import') }}" method="post" enctype="multipart/form-data">
                 {!! csrf_field() !!}
@@ -37,7 +37,7 @@
                 </div>
                 </form>
             </div>
-        </div>
+        </div> -->
     </div>
 @stop
 

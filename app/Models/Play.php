@@ -20,27 +20,24 @@ class Play extends Model
                       ->get();
     }
 
-    public static function pickPlayer($prize_id, $num_player=1, $is_winner_inc=true, $unique_winner=true)
+    public static function pickPlayer($prize_id, $num_player=1, $is_winner_inc=true)
     {
       $exist_winner  = Play::filterWinners($prize_id);
 
         $pick_winner = DB::table('participants as pt')
                               ->select('pl.participant_id', 'pl.id', 'lk.event_id', 'op.id as prize_id', 'op.title', 'pt.id_card as number', 'pt.name', 'pt.phone')
-                              ->join(
-                                  DB::raw('(SELECT pl.participant_id, pl.id, pl.lucky_id, pl.is_picked FROM plays pl GROUP BY pl.participant_id) AS pl'), 'pl.participant_id', '=', 'pt.id'
-                                )
+                              ->join('plays as pl', 'pl.participant_id', '=', 'pt.id')
                               ->join('luckies as lk', 'lk.id', '=', 'pl.lucky_id')
-                              ->join('offer_prizings as op', function($join) use ($prize_id){
-                                      $join->on('op.event_id', '=', 'lk.event_id');
-                                      $join->where('op.id', $prize_id);
-                                })
-                              ->where('pl.is_picked', 0);
+                              ->join('offer_prizings as op', 'op.event_id', '=', 'lk.event_id')
+                              ->where('pl.is_picked', 0)
+                              ->where('op.id', $prize_id);
 
       if(!$is_winner_inc && count($exist_winner)){
         $pick_winner = $pick_winner->whereNotIn('pl.participant_id', $exist_winner);
       }
       
-        $pick_winner = $pick_winner->inRandomOrder()
+        $pick_winner = $pick_winner->groupBy('pt.id')
+                                   ->inRandomOrder()
                                    ->limit($num_player)
                                    ->offset(0)
                                    ->get();

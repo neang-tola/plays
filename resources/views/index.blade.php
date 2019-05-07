@@ -8,7 +8,6 @@
 
     <title>Setting Lucky Draw Application</title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}">
-    <link href="https://fonts.googleapis.com/css?family=Changa+One|Squada+One" rel="stylesheet">
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/select2/select2.css') }}" />
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -65,16 +64,18 @@
 
 <script>
     $(document).ready(function() {
-        $('.select2').select2();
+        $('.select2').select2();     
     });    
+
+    // check_data();
 
     $('body').on('change', '#select_event', function(){
         var gift_offer = $('#select_gift');
         var event_id = $(this).val();
         var get_url  = "{{ route('get_prize', '') }}/"+ event_id;
 
-        gift_offer.find('option').not(':first').remove();
-        $('#btn_save').addClass('disabled').prop('disabled', true);
+        // gift_offer.find('option').not(':first').remove();
+        // $('#btn_save').addClass('disabled').prop('disabled', true);
 
         if(event_id != '' && $.isNumeric(event_id)){
                 $.ajax({
@@ -125,32 +126,32 @@
             dataType: 'json',
             data: {'event_id': event_id, 'prize_id': prize_id },
             beforeSend: function(){
-                $('#select_event').prop('disabled', true).select2();
-                $('#select_gift').prop('disabled', true).select2();
+                // $('#select_event').prop('disabled', true).select2();
+                // $('#select_gift').prop('disabled', true).select2();
                 $('#btn_save').addClass('disabled').prop('disabled', true);
             },
             success: function(response){
                 if (response.msg == 'Successful'){
-
+                    $('#select_gift option:selected').prop('disabled', true).select2();
                 }
             }
         })
     });
 
-  setTimeout(function(){
-    check_data();
-  }, 1000);
+
 
   function check_data(){
+
         $.ajax({
             url: '{{ route("check_spin_action") }}',
             method: 'GET',
             dataType: 'json',
             success: function(response){
+                console.log(response);
                 $('#select_event').prop('disabled', true).select2();
                 $('#select_gift').prop('disabled', true).select2();
                 $('#btn_save').addClass('disabled').prop('disabled', true);                
-                if (response.msg == 'yes'){
+                if (response.msg == 'no'){
                     $('#select_event').prop('disabled', false).select2();
                     $('#select_gift').prop('disabled', false).select2();
                     $('#btn_save').removeClass('disabled').prop('disabled', false);
