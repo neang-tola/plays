@@ -64,7 +64,6 @@
         </p>
         <audio id="createSoundCtrl">
           <source src="{{ asset('sound/game.mp3') }}" type="audio/mpeg">
-          Your browser does not support the audio element.
         </audio>      
     </div>
 
@@ -108,7 +107,8 @@
 
         $('body').on('click', '#start_spin', function(){
             $('#createSoundCtrl')[0].play();
-            loading_data(true);
+            $(this).addClass('disabled').prop('disabled', true);
+            loading_data();
 
             setTimeout(function(){
                 $('#winner_list').fadeIn();
@@ -228,15 +228,6 @@
             if(num > 0){
                 var params = "?inc_win="+ incw +"&count="+ num +"&prize_id="+ prize_id +"&time_id="+ time_id +"&event_id="+ event_id;
                 var get_url = "{{ route('pickup_winner') }}"+ params;
-                var ind_num = $('#winner_list tbody tr:last').text();
-
-                if(ind_num == '' && last_tr == 0){
-                    ind_num = 0;
-                }else if(ind_num == '' && last_tr > 0){
-                    ind_num = parseInt(last_tr);
-                }else{
-                    ind_num = parseInt(ind_num);
-                }
 
                 $('#winner_list').fadeOut();
                 $('#winner_list tbody').empty();
@@ -260,31 +251,50 @@
                         if(response.status == 'Successful'){
                             luckies = response.data;
                             var winner_tr = '';
-                            // var ind_num   = (last_tr == '') ? 0 : parseInt(last_tr);
+
                             if(luckies.length > 0){
+                                var ind_num   = parseInt(luckies[0].winner_count);
+                                console.log(luckies[0].prize_count);
+
                                 for(var j=0; j < luckies.length; j++){
                                     odometers[j].update(luckies[j].number);
          
                                     winner_tr += listDownWinner(++ind_num, luckies[j].name, luckies[j].number, luckies[j].title);
                                 }
-                                if(response.count == 0){
-                                    $('#start_spin').addClass('disabled').prop('disabled', true).fadeOut();
-                                    $('#next_prize').fadeIn();
+
+                                $('#winner_list').fadeIn();
+                                if(response.count == 0 && luckies[0].prize_count > 1){
+                                    // case show next prize
+                                    setTimeout(function(){
+                                        $('#start_spin').addClass('disabled').prop('disabled', true).fadeOut();
+                                        $('#next_prize').fadeIn();
+                                        $('#winner_list tbody').html(winner_tr);
+                                    }, 14000);
+
+                                }else if(response.count == 0 && luckies[0].prize_count == 1){
+                                    // case end of prize
+                                    setTimeout(function(){
+                                        $('#winner_list tbody').html(winner_tr);
+                                        $('#start_spin').fadeOut();
+                                        $('#next_prize').fadeOut();
+                                    }, 14000);
+
                                 }else{
-                                    $('#start_spin').removeClass('disabled').prop('disabled', false);
+                                    // case spin continue
+                                    setTimeout(function(){
+                                        $('#start_spin').removeClass('disabled').prop('disabled', false).fadeIn();                                 
+                                        $('#winner_list tbody').html(winner_tr);
+                                    }, 14000);  
+
                                 }
                                 
-                                $('#winner_list').fadeIn();
-                                setTimeout(function(){
-                                    $('#winner_list tbody').html(winner_tr);
-                                }, 14000);
                     
                             }                            
                         }
                         
                     }
                 });
-                // console.log(luckies);
+    
             }
         }
 

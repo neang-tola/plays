@@ -36,11 +36,6 @@ Route::get('/check-spin-action', [
     'as'   => 'check_spin_action'
 ]);
 
-Route::get('/update-spin-time', [
-    'uses' => 'LuckyDrawController@updateSpinTime',
-    'as'   => 'update_spintime'
-]);
-
 Route::get('/reservation-winner', [
     'uses' => 'LuckyDrawController@pickUpWinner',
     'as'   => 'pickup_winner'

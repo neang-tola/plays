@@ -2,7 +2,7 @@
         margin: 0;
         padding: 0;
         width: 100%;
-        min-height: 600px;
+        min-height: 665px;
         background-image: linear-gradient(to bottom, rgba(12,113,150,1) 0%, rgba(33,180,226,1) 51%, rgba(113,206,239,1) 68%, rgba(239,245,247,1) 98%, rgba(239,245,247,1) 10%);
         overflow-x: hidden;
       }
@@ -125,7 +125,7 @@
         border-collapse: separate;
         border-spacing: 5px;
         border-color: #0d47a1;        
-        width: 100%;
+        width: 98%;
         border-radius: 10px;
         display: none;
       }
@@ -269,7 +269,8 @@
 }
 
 .clock {
-  width: 230px;
+  width: 260px;
   display: inline-block;
   font-family: Arial;
+  font-size: 45px;
 }

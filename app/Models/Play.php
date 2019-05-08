@@ -26,6 +26,8 @@ class Play extends Model
 
         $pick_winner = DB::table('participants as pt')
                               ->select('pl.participant_id', 'pl.id', 'lk.event_id', 'op.id as prize_id', 'op.title', 'pt.id_card as number', 'pt.name', 'pt.phone')
+                              ->selectRaw('(SELECT count(w.id) FROM winners w WHERE w.prize_id = op.id) as winner_count')
+                              ->selectRaw('(SELECT count(sp.id) FROM spin_times sp WHERE sp.ready != 1) as prize_count')
                               ->join('plays as pl', 'pl.participant_id', '=', 'pt.id')
                               ->join('luckies as lk', 'lk.id', '=', 'pl.lucky_id')
                               ->join('offer_prizings as op', 'op.event_id', '=', 'lk.event_id')
