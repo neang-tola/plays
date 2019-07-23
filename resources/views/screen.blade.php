@@ -23,7 +23,7 @@
       </div>
       <div class="col-6 text-center">
         <img src="{{ asset('img/Letter.png') }}" class="img_responsive" />
-        <h2 class="event_title">09-05-2019 <span id="MyClockDisplay" class="clock" onload="showTime()"></span></h2>
+        <h2 class="event_title">09-07-2019 <span id="MyClockDisplay" class="clock" onload="showTime()"></span></h2>
       </div>
       <div class="col text-center">
         <img src="{{ asset('img/Bloby.png') }}" class="img_responsive" />

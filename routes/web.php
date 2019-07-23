@@ -41,6 +41,11 @@ Route::get('/reservation-winner', [
     'as'   => 'pickup_winner'
 ]);
 
+Route::get('export', [
+    'uses' => 'LuckyDrawController@export',
+    'as'   => 'export'
+]);
+
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 

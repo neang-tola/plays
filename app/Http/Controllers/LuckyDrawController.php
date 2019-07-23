@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Maatwebsite\Excel\Facades\Excel;
+
 use TCG\Voyager\Voyager;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use App\Exports\ExportGenerator;
 use App\Models\OfferPrizing;
 use App\Models\SpinTime;
 use App\Models\Event;
@@ -109,6 +112,12 @@ class LuckyDrawController extends Controller
         $status = ['msg'=>'yes', 'data'=>$cur_data];
       }
       return response()->json($status);
+    }
+
+    public function export()
+    {
+      $file_name = 'winner_export_'. date('d_m_Y');
+      return Excel::download(new ExportGenerator, $file_name);
     }
 }
   
