@@ -16,6 +16,11 @@ Route::get('/', [
     'as'   => 'home'   
 ]);
 
+Route::get('/debug', [
+    'uses'  => 'LuckyDrawController@debug',
+    'as'    => 'debug'
+]);
+
 Route::get('/screen-show', [
     'uses' => 'LuckyDrawController@screen',
     'as'   => 'screen_show'   
@@ -41,15 +46,18 @@ Route::get('/reservation-winner', [
     'as'   => 'pickup_winner'
 ]);
 
-Route::get('export', [
+Route::get('export/{event_id?}', [
     'uses' => 'LuckyDrawController@export',
     'as'   => 'export'
 ]);
 
 Route::group(['prefix' => 'admin'], function () {
-    Voyager::routes();
 
     Route::post('chance-generator', ['uses' => 'Backend\LuckiesController@chance_generator', 'as' => 'luckies.chance_generator']); 
 
-    Route::post('import_participants', ['uses' => 'Backend\ParticipantsController@handleImportData', 'as' => 'participants.import']); 
+    Route::post('import-participants', ['uses' => 'Backend\ParticipantsController@handleImportData', 'as' => 'participants.import']);     
+
+    Route::post('import-luckied', ['uses' => 'Backend\LuckiesController@importData', 'as' => 'lucky.import']); 
+
+    Voyager::routes();
 });

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\Winner;
 
 class exportWinner extends Command
 {
@@ -38,11 +39,17 @@ class exportWinner extends Command
     public function handle()
     {
         $eventID = $this->argument('eventId');
-dd($eventID);
+
         $confirmation = $this->confirm('Are you sure you want reset all data by event ID = '. $eventID .' ?');
         if ($confirmation) {
-            $controller = app()->make('App\Http\Controllers\LuckyDrawController');
-            app()->call([$controller, 'export'], ['event_id'=>$eventID]);
+            $event_id = (int)$eventID;
+            $data = Winner::getAllWinner($event_id)->toArray();
+            $file_name = 'winner_export_'. date('d_m_Y');
+            return \Excel::create($file_name, function($excel) use ($data){
+                $excel->sheet('mySheet', function($sheet) use ($data){
+                    $sheet->fromArray($data);
+                });
+            })->download('csv');
         }else{
             $this->info('You are canceling Export Winner by event ID = '. $eventID .'.');
         }        

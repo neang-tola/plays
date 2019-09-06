@@ -1,0 +1,13 @@
+ *ssh
+	=>ssh lucky@172.20.20.249 | lucky
+ *Backend
+	=>/admin
+	=>user: admin@system.com
+	=>pass: admin
+ *Command line
+	=> Remove chance by participant argument: 1 "12,20,80,90"
+		lucky:removeChanceByParticipant 3 "10,20,30,40"
+	=> Export winner
+		lucky:exportWinner
+	=> Reset every thing related to Lucky app argument: 1
+		lucky:resetByEvent 3

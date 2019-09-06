@@ -25,19 +25,19 @@
             @endcan
             @include('voyager::multilingual.language-selector')
         </div>
-<!--         <div class="col-md-6 col-sm-6">
+         <div class="col-md-6 col-sm-6">
             <div class="row" style="height: 100px; padding-top: 30px">
-                <form id="action_import" action="{{ route('participants.import') }}" method="post" enctype="multipart/form-data">
-                {!! csrf_field() !!}
-                <div class="col-md-8 col-sm-8" style="padding: 5px 0 0 0;">
-                    <input type="file" id="file" name="import_file" style="padding: 7px 5px; width: 100%;" />
-                </div>
-                <div class="col-md-4 col-sm-4">
-                    <button class="btn btn-warning" id="btn_import"> <i class="voyager-upload"></i> Import</button>
-                </div>
+                <form action="{{ route('participants.import') }}" method="post" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    <div class="col-md-8 col-sm-8" style="padding: 5px 0 0 0;">
+                        <input type="file" id="file" name="import_file" style="padding: 7px 5px; width: 100%;" />
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <button class="btn btn-warning" id="btn_import"> <i class="voyager-upload"></i> Import</button>
+                    </div>
                 </form>
             </div>
-        </div> -->
+        </div> 
     </div>
 @stop
 
@@ -286,6 +286,13 @@
             $('.select_all').on('click', function(e) {
                 $('input[name="row_id"]').prop('checked', $(this).prop('checked'));
             });
+
+            @php
+                if(\Session::has('alert')){
+                    $alert = \Session::get('alert');
+                    echo "toastr['". $alert['type'] ."']('". $alert['message'] ."');";
+                }
+            @endphp
         });
 
 
@@ -304,14 +311,8 @@
                       url: form_data.attr('action'),
                       data: form_data.serialize(),
                       dataType: "json",
-                      beforeSend: function(){
-                        $('#gen_ticket').attr('class', 'btn btn-default disabled');
-                        
-                      },
                       success: function(resultData) { 
-                        console.log(resultData);
                         toastr[resultData.alert_type](resultData.message);
-                      
                       }
             });
         });

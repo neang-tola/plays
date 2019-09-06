@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class Winner extends Model
 {
-  public static function getAllWinner($event_id){
+  public static function getAllWinnerrr($event_id){
     return DB::table('winners as w')
                 ->select('e.title as event_title', 'pa.name', 'pa.id_card as number', 'pr.title as prize')
                 ->addSelect('pa.phone as phone_number', 'pa.location', 'w.created_at as winned_at')
@@ -17,4 +17,14 @@ class Winner extends Model
                 ->where('e.id', $event_id)
                 ->get();
   }
+
+  public static function getAllWinner($event_id){
+    return Winner::join('participants as pa', 'pa.id', '=', 'winners.participant_id')
+                ->join('events as e', 'e.id', '=', 'winners.event_id')
+                ->join('offer_prizings as pr', 'pr.id', '=', 'winners.prize_id')        
+                ->select('e.title as event_title', 'pa.name', 'pa.id_card as number', 'pr.title as prize')
+                ->addSelect('pa.phone as phone_number', 'pa.location', 'winners.created_at as winned_at')
+                ->where('e.id', $event_id)
+                ->get();
+  }  
 }

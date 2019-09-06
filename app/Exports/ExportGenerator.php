@@ -13,7 +13,7 @@ class ExportGenerator implements FromCollection
     protected $id;
     public function __construct()
     {
-      $this->id = request()->get('event_id');
+      $this->id = request()->route('event_id');
     }
 
     public function collection()

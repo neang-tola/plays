@@ -50,10 +50,12 @@ class Play extends Model
     protected static function filterWinners($prize_id)
     {
       $winner_list = [];
-      $get_win = DB::table('winners')
-                          ->select('participant_id')
-                          ->where('prize_id', $prize_id)
-                          ->groupBy('participant_id')
+      $get_win = DB::table('winners as w')
+                          ->select('w.participant_id')
+                          ->join('offer_prizings as op', 'op.id', '=', 'w.prize_id')
+                          ->where('w.prize_id', $prize_id)
+                          ->where('op.include_winner', 0)
+                          ->groupBy('w.participant_id')
                           ->get();
 
       if(count($get_win)){

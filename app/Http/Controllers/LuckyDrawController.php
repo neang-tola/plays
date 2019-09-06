@@ -17,6 +17,7 @@ use App\Models\SpinTime;
 use App\Models\Event;
 use App\Models\Play;
 use App\Models\Winner;
+use App\Models\Participant;
 
 class LuckyDrawController extends Controller
 {
@@ -114,10 +115,26 @@ class LuckyDrawController extends Controller
       return response()->json($status);
     }
 
-    public function export()
+    public function export($event_id=null)
     {
-      $file_name = 'winner_export_'. date('d_m_Y');
-      return Excel::download(new ExportGenerator, $file_name);
+      if(empty($event_id))  return;
+
+      $file_name = 'winner_export_'. date('d_m_Y') .'.xlsx';
+      $data = Winner::getAllWinner((int)$event_id)->toArray();   
+
+        return Excel::create($file_name, function($excel) use ($data) {
+            $excel->sheet('mySheet', function($sheet) use ($data)
+            {
+                $sheet->fromArray($data);
+            });
+        })->download('xlsx');
+
+    }
+
+    public function debug()
+    {
+      $dd = Participant::checkExistingMember('Tola Neang', '3333333');
+      dd($dd);
     }
 }
   

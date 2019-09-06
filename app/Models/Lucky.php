@@ -33,4 +33,20 @@ class Lucky extends Model
                       ->get();
 
     }
+
+    public static function checkExistingLuckyByEvent($event_id, $p_id=null)
+    {
+      $status = true;
+      if(!empty($event_id) && !empty($p_id)){
+        $status = false;
+        $check  = Lucky::where('event_id', $event_id)
+                              ->where('participant_id', $p_id)
+                              ->first();     
+        if(!empty($check)){
+          $status = true;
+        }
+      }
+
+      return $status;
+    }    
 }

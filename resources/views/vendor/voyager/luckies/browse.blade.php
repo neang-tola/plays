@@ -41,6 +41,17 @@
                     <a class="btn btn-primary disabled" id="gen_ticket"> <i class="voyager-sun"></i> Chance Generator</a>
                 </div>
             </div>
+            <div class="row">
+                <form action="{{ route('lucky.import') }}" method="post" enctype="multipart/form-data">
+                    {!! csrf_field() !!}
+                    <div class="col-md-8 col-sm-8" style="padding: 5px 0 0 0;">
+                        <input type="file" id="file" name="import_data" style="padding: 7px 5px; width: 100%;" />
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <button class="btn btn-warning" id="btn_import"> <i class="voyager-upload"></i> Import</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 @stop
@@ -290,6 +301,13 @@
             $('.select_all').on('click', function(e) {
                 $('input[name="row_id"]').prop('checked', $(this).prop('checked'));
             });
+
+            @php
+                if(\Session::has('alert')){
+                    $alert = \Session::get('alert');
+                    echo "toastr['". $alert['type'] ."']('". $alert['message'] ."');";
+                }
+            @endphp            
         });
 
 
